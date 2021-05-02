@@ -1,9 +1,7 @@
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl; //this for auto dirctionality
 import 'dart:ui' as ui;
 

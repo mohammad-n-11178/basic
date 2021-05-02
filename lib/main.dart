@@ -1,18 +1,13 @@
 import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/providers/theme_provider.dart';
-import 'package:basic_project/screens/general_setting.dart';
 import 'package:basic_project/screens/home_screen.dart';
-import 'package:basic_project/screens/splash_screen.dart';
-import 'package:basic_project/widgets/app_drawer.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
-import 'screens/setting_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
 //to edit the navigation and status bar
   // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

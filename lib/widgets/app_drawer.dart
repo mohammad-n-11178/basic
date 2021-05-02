@@ -1,4 +1,3 @@
-import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/screens/auth_form.dart';
 import 'package:basic_project/screens/general_setting.dart';
