@@ -1,9 +1,8 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import '../models/http_exception.dart';
 
@@ -13,7 +12,11 @@ class AuthProvider with ChangeNotifier {
   String _userId;
   Timer _authTimer;
 
-  String siteUrl = "https://edu-technology.net/main/public/api";
+  // Map<String,Object> extractedData;
+
+  String siteUrl = "https://edu-technology.net/main/api";
+
+  List finalErrorsList = [];
 
   bool get isAuth {
     return _token != null;
@@ -35,7 +38,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> _authenticateUp(String email, String password,
       String passwordconfirmation, String username, String name,
       {String phonenumber}) async {
-    debugPrint(email);
+    debugPrint("email is $email");
     debugPrint(password);
     debugPrint(passwordconfirmation);
     debugPrint(username);
@@ -59,19 +62,43 @@ class AuthProvider with ChangeNotifier {
     });
 
     request.headers.addAll(headers);
-
     http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    } else {
-      print("reasonPhrase is => ${response.reasonPhrase}");
-      print("statuscode is  => ${response.statusCode}");
-      print("contentLength is  => ${response.contentLength}");
-      print("isRedirect is  => ${response.isRedirect}");
-      print("persistentConnection is  => ${response.persistentConnection}");
-      print("request is  => ${response.request}");
-      print("stream is  => ${response.stream}");
+    try {
+      if (response.statusCode == 200) {
+        await response.stream.bytesToString().then((value) {
+          print(value);
+          print("here 1");
+        });
+      } else {
+        print(response.statusCode);
+        print(response.reasonPhrase);
+
+        print("here 2");
+
+        // here I want to print the message and the errors
+        var responseStreemed = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(responseStreemed.body);
+        print(jsonResponse['message']);
+        print("here 3");
+
+        var errorMap = jsonResponse['errors'] as Map<String, dynamic>;
+
+        if (errorMap.entries.isNotEmpty) {
+          var errorList = errorMap.values.toList();
+          errorList.forEach((element) {
+            for (Object i in element) {
+              finalErrorsList.add(i);
+            }
+          });
+        }
+        // print(jsonResponse);
+        throw jsonResponse['message'];
+
+        // print(responseStreemed);
+      }
+    } catch (e) {
+      throw e;
     }
   }
 
@@ -96,13 +123,14 @@ class AuthProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
     } else {
-      print("reasonPhrase is => ${response.reasonPhrase}");
-      print("statuscode is  => ${response.statusCode}");
-      print("contentLength is  => ${response.contentLength}");
-      print("isRedirect is  => ${response.isRedirect}");
-      print("persistentConnection is  => ${response.persistentConnection}");
-      print("request is  => ${response.request}");
-      print("stream is  => ${response.stream}");
+      print("reasonPhrase is => ${response.reasonPhrase.toString()}");
+      print("statuscode is  => ${response.statusCode.toString()}");
+      print("contentLength is  => ${response.contentLength.toString()}");
+      print("isRedirect is  => ${response.isRedirect.toString()}");
+      print(
+          "persistentConnection is  => ${response.persistentConnection.toString()}");
+      print("request is  => ${response.request.toString()}");
+      print("stream is  => ${response.stream.toString()}");
     }
   }
   // final url = "http://main.edu-technology.net/public/api/$urlSegment";

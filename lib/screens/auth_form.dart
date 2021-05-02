@@ -43,11 +43,11 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   // ignore: missing_return
-  String validusername(String val) {
+  String validusernameAndName(String val) {
     if (val.isEmpty) {
       return "username can't be empty";
     }
-    if (val.length < 4) {
+    if (val.length < 6) {
       return "username can't be less than 4 letters";
     }
     if (val.length > 50) {
@@ -88,12 +88,69 @@ class _AuthFormState extends State<AuthForm> {
   // ignore: missing_return
   String validconfirmpassword(String val) {
     if (val != password.text) {
-      return "rewrite passwords";
+      return "passwords does not match";
     }
   }
 
   TapGestureRecognizer _changesign; // to change sign in/up
   bool showsignin = true;
+
+  void _showErrorDialog(String message, List errorList) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          message,
+          style: TextStyle(color: Colors.black),
+        ),
+        content: Container(
+          height: 100,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ...errorList.map((catdata) => Text(catdata.toString())).toList()
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                errorList.clear();
+              },
+              child: Text("Okay"))
+        ],
+      ),
+    );
+  }
+
+  void submitSignUp() async {
+    final isValid = formstatesignup.currentState.validate();
+    print("formstatesignup is valid {$isValid}");
+    FocusScope.of(context).unfocus();
+
+    if (isValid) {
+      try {
+        print("valiiiiiiid");
+        setState(() {
+          _isloading = true;
+        });
+        await Provider.of<AuthProvider>(context, listen: false).signUp(
+            email.text,
+            password.text,
+            confirmpassword.text,
+            username.text,
+            name.text,
+            phonenumber: phonenumber.text);
+        setState(() => _isloading = false);
+      } catch (error) {
+        setState(() => _isloading = false);
+        _showErrorDialog(error,
+            Provider.of<AuthProvider>(context, listen: false).finalErrorsList);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -113,9 +170,6 @@ class _AuthFormState extends State<AuthForm> {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     var txt = Provider.of<LanguageProvider>(context);
 
     SizedBox _buildSizedBox(double height) => SizedBox(height: height);
@@ -172,7 +226,8 @@ class _AuthFormState extends State<AuthForm> {
                     height: 50.0,
                     child: TextFormField(
                       controller: username,
-                      validator: validpassword,
+                      validator: validusernameAndName,
+                      keyboardType: TextInputType.name,
                       obscureText: false,
                       style: TextStyle(
                         color: Colors.white,
@@ -208,8 +263,9 @@ class _AuthFormState extends State<AuthForm> {
                     height: 50.0,
                     child: TextFormField(
                       controller: name,
-                      validator: validpassword,
+                      validator: validusernameAndName,
                       obscureText: false,
+                      keyboardType: TextInputType.name,
                       style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'OpenSans',
@@ -244,6 +300,7 @@ class _AuthFormState extends State<AuthForm> {
                   child: TextFormField(
                     controller: password,
                     validator: validpassword,
+                    keyboardType: TextInputType.visiblePassword,
                     obscureText: true,
                     style: TextStyle(
                       color: Colors.white,
@@ -279,7 +336,8 @@ class _AuthFormState extends State<AuthForm> {
                     height: 50.0,
                     child: TextFormField(
                       controller: confirmpassword,
-                      validator: validpassword,
+                      validator: validconfirmpassword,
+                      keyboardType: TextInputType.visiblePassword,
                       obscureText: true,
                       style: TextStyle(
                         color: Colors.white,
@@ -407,7 +465,7 @@ class _AuthFormState extends State<AuthForm> {
           elevation: 5.0,
           onPressed: () {
             return Provider.of<AuthProvider>(context, listen: false)
-              .logIn(email.text, password.text);
+                .logIn(email.text, password.text);
           },
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(
@@ -417,7 +475,7 @@ class _AuthFormState extends State<AuthForm> {
           child: Text(
             txt.getTexts('sign_in'),
             style: TextStyle(
-              color: Color(0xFF527DAA),
+              color: Color(0xFF61A4F1),
               letterSpacing: 1.5,
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -430,15 +488,12 @@ class _AuthFormState extends State<AuthForm> {
 
     Widget _buildLogUpBtn() {
       return Container(
-        padding: EdgeInsets.symmetric(vertical: 25.0),
+        padding: EdgeInsets.symmetric(vertical: 20.0),
         width: double.infinity,
         // ignore: deprecated_member_use
         child: RaisedButton(
           elevation: 5.0,
-          onPressed: () => Provider.of<AuthProvider>(context, listen: false)
-              .signUp(email.text, password.text, confirmpassword.text,
-                  username.text, name.text,
-                  phonenumber: phonenumber.text),
+          onPressed: submitSignUp,
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),
@@ -447,7 +502,7 @@ class _AuthFormState extends State<AuthForm> {
           child: Text(
             txt.getTexts('sign_up'),
             style: TextStyle(
-              color: Color(0xFF527DAA),
+              color: Color(0xFF478DE0),
               letterSpacing: 1.5,
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -476,12 +531,12 @@ class _AuthFormState extends State<AuthForm> {
                 child:
                     new Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                     child: Text(
                       txt.getTexts('continue_with_google'),
                       style: TextStyle(
-                        color: Color(0xFF527DAA),
-                        letterSpacing: 1.3,
+                        color: Color(0xFF478DE0),
+                        letterSpacing: 1.1,
                         fontSize: 15.0,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'OpenSans',
@@ -490,8 +545,8 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                   new Image.asset(
                     'assets/images/google_logo.png',
-                    height: 40.0,
-                    width: 40.0,
+                    height: 35.0,
+                    width: 35.0,
                   ),
                 ]))
           ]);
@@ -515,12 +570,12 @@ class _AuthFormState extends State<AuthForm> {
                 child:
                     new Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                     child: Text(
                       txt.getTexts('continue_with_facebook'),
                       style: TextStyle(
-                        color: Color(0xFF527DAA),
-                        letterSpacing: 1.3,
+                        color: Color(0xFF478DE0),
+                        letterSpacing: 1.1,
                         fontSize: 15.0,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'OpenSans',
@@ -529,8 +584,8 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                   new Image.asset(
                     'assets/images/facebook.png',
-                    height: 40.0,
-                    width: 40.0,
+                    height: 35.0,
+                    width: 35.0,
                   ),
                 ]))
           ]);
@@ -640,7 +695,7 @@ class _AuthFormState extends State<AuthForm> {
                         physics: AlwaysScrollableScrollPhysics(),
                         padding: EdgeInsets.symmetric(
                           horizontal: SizeConfig.safeBlockHorizontal * 8,
-                          vertical: SizeConfig.safeBlockVertical * 6,
+                          vertical: SizeConfig.safeBlockVertical * 5,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -659,12 +714,12 @@ class _AuthFormState extends State<AuthForm> {
                             SizedBox(
                                 height: showsignin
                                     ? SizeConfig.safeBlockVertical * 7
-                                    : SizeConfig.safeBlockVertical * 5),
+                                    : SizeConfig.safeBlockVertical * 4),
                             _buildForm(),
                             showsignin
                                 ? _buildForgotPasswordBtn()
                                 : _buildSizedBox(
-                                    SizeConfig.safeBlockVertical * 2),
+                                    SizeConfig.safeBlockVertical * 1.5),
                             showsignin ? _buildLoginBtn() : _buildLogUpBtn(),
                             _buildSizedBox(SizeConfig.safeBlockVertical * 0.1),
                             _isloading ? LoadingCircul() : _buildOrText(),
