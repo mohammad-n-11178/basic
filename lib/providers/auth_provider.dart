@@ -33,19 +33,23 @@ class AuthProvider with ChangeNotifier {
     return _userId;
   }
 
-  Future<void> _authenticateUp(String email, String password,
-      String passwordconfirmation, String username, String name,
-      {String phonenumber}) async {
+  Future<void> _authenticateUp(
+      String email,
+      String password,
+      String passwordconfirmation,
+      String username,
+      String name,
+      String deviceLanguage) async {
     debugPrint("email is $email");
     debugPrint(password);
     debugPrint(passwordconfirmation);
     debugPrint(username);
     debugPrint(name);
-    debugPrint(phonenumber);
 
     var headers = {
       'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
+      'X-Requested-With': 'XMLHttpRequest',
+      "X-localization": deviceLanguage
     };
 
     var request = http.MultipartRequest('POST', Uri.parse('$siteUrl/register'));
@@ -56,7 +60,6 @@ class AuthProvider with ChangeNotifier {
       'password_confirmation': passwordconfirmation,
       'username': username,
       'name': name,
-      'phone_number': phonenumber
     });
 
     request.headers.addAll(headers);
@@ -69,11 +72,10 @@ class AuthProvider with ChangeNotifier {
           print("here 1");
         });
       } else {
+        finalErrorsList.clear();
         print(response.statusCode);
         print(response.reasonPhrase);
-
         print("here 2");
-
         // here I want to print the message and the errors
         var responseStreemed = await http.Response.fromStream(response);
         var jsonResponse = json.decode(responseStreemed.body);
@@ -100,78 +102,76 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _authenticateIn(String email, String password) async {
+  Future<void> _authenticateIn(
+      String email, String password, String deviceLanguage) async {
     debugPrint(email);
     debugPrint(password);
 
     var headers = {
       'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
+      'X-Requested-With': 'XMLHttpRequest',
+      "X-localization": deviceLanguage
     };
     var request = http.MultipartRequest('POST', Uri.parse('$siteUrl/login'));
     request.fields.addAll({
-      'email': email,
+      'login': email,
       'password': password,
     });
 
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
+    try {
+      if (response.statusCode == 200) {
+        await response.stream.bytesToString().then((value) {
+          print(value);
+          print("here 1");
+        });
+      } else if (response.statusCode == 401) {
+        var responseStreemed = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(responseStreemed.body);
+        print(jsonResponse['error']);
+      } else {
+        print(response.statusCode);
+        print(response.reasonPhrase);
 
-    if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    } else {
-      print("reasonPhrase is => ${response.reasonPhrase.toString()}");
-      print("statuscode is  => ${response.statusCode.toString()}");
-      print("contentLength is  => ${response.contentLength.toString()}");
-      print("isRedirect is  => ${response.isRedirect.toString()}");
-      print(
-          "persistentConnection is  => ${response.persistentConnection.toString()}");
-      print("request is  => ${response.request.toString()}");
-      print("stream is  => ${response.stream.toString()}");
+        print("here 2");
+
+        // here I want to print the message and the errors
+        var responseStreemed = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(responseStreemed.body);
+        print(jsonResponse);
+        print("here 3");
+        var errorMap = jsonResponse['errors'] as Map<dynamic, dynamic>;
+        if (errorMap.entries.isNotEmpty) {
+          var errorList = errorMap.values.toList();
+          errorList.forEach((element) {
+            for (Object i in element) {
+              finalErrorsList.add(i);
+            }
+          });
+        }
+        throw jsonResponse['message'];
+      }
+    } catch (e) {
+      throw e;
     }
   }
-  // final url = "http://main.edu-technology.net/public/api/$urlSegment";
-  // try {
-  //   final res = await http.post(url,
-  //       body: json.encode({
-  //         'email': email,
-  //         'password': password,
-  //         'returnSecureToken': true,
-  //       }));
-  //   final responseData = json.decode(res.body);
-  //   if (responseData['error'] != null) {
-  //     HttpException(responseData['error']['message']);
-  //   }
-  //   _token = responseData['idToken'];
-  //   _userId = responseData['localId'];
-  //   _expairyDate = DateTime.now()
-  //       .add(Duration(seconds: int.parse(responseData['expiresIn'])));
-  //   _autoLogout();
 
-  //   notifyListeners();
-
-  //   final prefs = await SharedPreferences.getInstance();
-  //   String userData = json.encode({
-  //     'token': _token,
-  //     'userId': _userId,
-  //     'expiryDate': _expairyDate.toIso8601String()
-  //   });
-  //   prefs.setString('userData', userData);
-  // } catch (e) {
-  //   throw e;
-  // }
-
-  Future<void> signUp(String email, String password,
-      String passwordconfirmation, String username, String name,
-      {String phonenumber}) async {
+  Future<void> signUp(
+      String email,
+      String password,
+      String passwordconfirmation,
+      String username,
+      String name,
+      String deviceLanguage) async {
     return _authenticateUp(
-        email, password, passwordconfirmation, username, name,
-        phonenumber: phonenumber);
+        email, password, passwordconfirmation, username, name, deviceLanguage);
   }
 
-  Future<void> logIn(String email, String password) async {
-    return _authenticateIn(email, password);
+  Future<void> logIn(
+      String email, String password, String deviceLanguage) async {
+    return _authenticateIn(email, password, deviceLanguage);
   }
 
   Future<bool> tryAutoLogIn() async {
@@ -217,3 +217,37 @@ class AuthProvider with ChangeNotifier {
     _authTimer = Timer(Duration(seconds: timeToExpiry), logOut);
   }
 }
+
+
+
+
+  // final url = "http://main.edu-technology.net/public/api/$urlSegment";
+  // try {
+  //   final res = await http.post(url,
+  //       body: json.encode({
+  //         'email': email,
+  //         'password': password,
+  //         'returnSecureToken': true,
+  //       }));
+  //   final responseData = json.decode(res.body);
+  //   if (responseData['error'] != null) {
+  //     HttpException(responseData['error']['message']);
+  //   }
+  //   _token = responseData['idToken'];
+  //   _userId = responseData['localId'];
+  //   _expairyDate = DateTime.now()
+  //       .add(Duration(seconds: int.parse(responseData['expiresIn'])));
+  //   _autoLogout();
+
+  //   notifyListeners();
+
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String userData = json.encode({
+  //     'token': _token,
+  //     'userId': _userId,
+  //     'expiryDate': _expairyDate.toIso8601String()
+  //   });
+  //   prefs.setString('userData', userData);
+  // } catch (e) {
+  //   throw e;
+  // }

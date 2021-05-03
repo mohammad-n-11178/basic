@@ -1,4 +1,3 @@
-
 import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:flutter/gestures.dart';
@@ -118,7 +117,7 @@ class _AuthFormState extends State<AuthForm> {
           ElevatedButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                errorList.clear();
+                // errorList.clear();
               },
               child: Text("Okay"))
         ],
@@ -138,12 +137,37 @@ class _AuthFormState extends State<AuthForm> {
           _isloading = true;
         });
         await Provider.of<AuthProvider>(context, listen: false).signUp(
+          email.text,
+          password.text,
+          confirmpassword.text,
+          username.text,
+          name.text,
+          Provider.of<LanguageProvider>(context).currentLangCode,
+        );
+        setState(() => _isloading = false);
+      } catch (error) {
+        setState(() => _isloading = false);
+        _showErrorDialog(error,
+            Provider.of<AuthProvider>(context, listen: false).finalErrorsList);
+      }
+    }
+  }
+
+  void submitSignIn() async {
+    final isValid = formstatesignin.currentState.validate();
+    print("formstatesignin is valid {$isValid}");
+    FocusScope.of(context).unfocus();
+
+    if (isValid) {
+      try {
+        print("valiiiiiiid");
+        setState(() {
+          _isloading = true;
+        });
+        await Provider.of<AuthProvider>(context, listen: false).logIn(
             email.text,
             password.text,
-            confirmpassword.text,
-            username.text,
-            name.text,
-            phonenumber: phonenumber.text);
+            Provider.of<LanguageProvider>(context).currentLangCode);
         setState(() => _isloading = false);
       } catch (error) {
         setState(() => _isloading = false);
@@ -464,10 +488,7 @@ class _AuthFormState extends State<AuthForm> {
         // ignore: deprecated_member_use
         child: RaisedButton(
           elevation: 5.0,
-          onPressed: () {
-            return Provider.of<AuthProvider>(context, listen: false)
-                .logIn(email.text, password.text);
-          },
+          onPressed: submitSignIn,
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),

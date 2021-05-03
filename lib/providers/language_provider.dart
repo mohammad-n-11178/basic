@@ -10,6 +10,7 @@ enum Languages {
 class LanguageProvider with ChangeNotifier {
   var currentLang = Languages.English;
   String currentLangText = "english";
+  String currentLangCode = "en";
 
   Map<String, Object> textsEn = {
     "settings": "Settings",
@@ -62,7 +63,7 @@ class LanguageProvider with ChangeNotifier {
     "name": "Name",
     "enter_your_name": "Enter your name",
     "phonenumber": "Phone number  (optinal)",
-    "enter_your_phonenumber" : "Enter your phone number"
+    "enter_your_phonenumber": "Enter your phone number"
   };
 
   Map<String, Object> textsAr = {
@@ -118,8 +119,7 @@ class LanguageProvider with ChangeNotifier {
     "name": "الاسم",
     "enter_your_name": "ادخل اسمك",
     "phonenumber": "رقم الهاتف (اختياري)",
-    "enter_your_phonenumber" : "ادخل رقم الهاتف الخاص بك"
-
+    "enter_your_phonenumber": "ادخل رقم الهاتف الخاص بك"
   };
 
   Map<String, Object> textsTr = {
@@ -172,10 +172,8 @@ class LanguageProvider with ChangeNotifier {
     "enter_your_username": "enter_your_username",
     "name": "Name",
     "enter_your_name": "Enter your name",
-    "enter_your_phonenumber" : "Enter your phone number",
+    "enter_your_phonenumber": "Enter your phone number",
     "phonenumber": "Phone number  (optinal)",
-
-
   };
 
   // changeLan(bool lan) async {
