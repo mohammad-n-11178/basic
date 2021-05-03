@@ -10,11 +10,10 @@ class AuthProvider with ChangeNotifier {
   String _userId;
   Timer _authTimer;
 
-  // Map<String,Object> extractedData;
-
   String siteUrl = "https://edu-technology.net/main/api";
 
   List finalErrorsList = [];
+  String error = 'there is an error.';
 
   bool get isAuth {
     return _token != null;
@@ -33,7 +32,7 @@ class AuthProvider with ChangeNotifier {
     return _userId;
   }
 
-  Future<void> _authenticateUp(
+  Future<void> _register(
       String email,
       String password,
       String passwordconfirmation,
@@ -49,9 +48,8 @@ class AuthProvider with ChangeNotifier {
     var headers = {
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
-      "X-localization": deviceLanguage
+      "X-localization": deviceLanguage,
     };
-
     var request = http.MultipartRequest('POST', Uri.parse('$siteUrl/register'));
 
     request.fields.addAll({
@@ -61,7 +59,6 @@ class AuthProvider with ChangeNotifier {
       'username': username,
       'name': name,
     });
-
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
 
@@ -69,21 +66,17 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         await response.stream.bytesToString().then((value) {
           print(value);
-          print("here 1");
         });
-      } else {
+      } else if (response.statusCode == 422) {
         finalErrorsList.clear();
         print(response.statusCode);
         print(response.reasonPhrase);
         print("here 2");
-        // here I want to print the message and the errors
         var responseStreemed = await http.Response.fromStream(response);
         var jsonResponse = json.decode(responseStreemed.body);
         print(jsonResponse['message']);
         print("here 3");
-
         var errorMap = jsonResponse['errors'] as Map<String, dynamic>;
-
         if (errorMap.entries.isNotEmpty) {
           var errorList = errorMap.values.toList();
           errorList.forEach((element) {
@@ -92,10 +85,10 @@ class AuthProvider with ChangeNotifier {
             }
           });
         }
-        // print(jsonResponse);
-        throw jsonResponse['message'];
-
-        // print(responseStreemed);
+        throw error;
+      } else {
+        print(response.statusCode);
+        throw error;
       }
     } catch (e) {
       throw e;
@@ -106,7 +99,7 @@ class AuthProvider with ChangeNotifier {
       String email, String password, String deviceLanguage) async {
     debugPrint(email);
     debugPrint(password);
-
+    finalErrorsList.clear();
     var headers = {
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
@@ -128,30 +121,15 @@ class AuthProvider with ChangeNotifier {
           print("here 1");
         });
       } else if (response.statusCode == 401) {
+        String error = 'there is an error.';
         var responseStreemed = await http.Response.fromStream(response);
         var jsonResponse = json.decode(responseStreemed.body);
         print(jsonResponse['error']);
-      } else {
-        print(response.statusCode);
-        print(response.reasonPhrase);
-
         print("here 2");
-
-        // here I want to print the message and the errors
-        var responseStreemed = await http.Response.fromStream(response);
-        var jsonResponse = json.decode(responseStreemed.body);
-        print(jsonResponse);
-        print("here 3");
-        var errorMap = jsonResponse['errors'] as Map<dynamic, dynamic>;
-        if (errorMap.entries.isNotEmpty) {
-          var errorList = errorMap.values.toList();
-          errorList.forEach((element) {
-            for (Object i in element) {
-              finalErrorsList.add(i);
-            }
-          });
-        }
-        throw jsonResponse['message'];
+        error = "your data is invalid.\nrewrite your details and try again";
+        throw error;
+      } else {
+        throw error;
       }
     } catch (e) {
       throw e;
@@ -165,7 +143,7 @@ class AuthProvider with ChangeNotifier {
       String username,
       String name,
       String deviceLanguage) async {
-    return _authenticateUp(
+    return _register(
         email, password, passwordconfirmation, username, name, deviceLanguage);
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
-  var primaryColor = Colors.indigo;
+  var primaryColor = Colors.blue;
   var accentColor = Colors.indigoAccent[100];
 
 

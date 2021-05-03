@@ -38,20 +38,33 @@ class _AuthFormState extends State<AuthForm> {
   // ignore: missing_return
   String validglobal(String val) {
     if (val.trim().isEmpty) {
-      return 'NOOOOOOOOO EMpty';
+      return 'this value can not be empty';
     }
   }
 
   // ignore: missing_return
-  String validusernameAndName(String val) {
+  String validUsername(String val) {
     if (val.isEmpty) {
       return "username can't be empty";
     }
-    if (val.length < 6) {
-      return "username can't be less than 4 letters";
+    if (val.length < 8) {
+      return "username can't be less than 8 letters";
     }
     if (val.length > 50) {
       return "username can't be more than 50 letters";
+    }
+  }
+
+  // ignore: missing_return
+  String validName(String val) {
+    if (val.isEmpty) {
+      return "name can't be empty";
+    }
+    if (val.length < 4) {
+      return "name can't be less than 4 letters";
+    }
+    if (val.length > 50) {
+      return "name can't be more than 50 letters";
     }
   }
 
@@ -95,20 +108,34 @@ class _AuthFormState extends State<AuthForm> {
   TapGestureRecognizer _changesign; // to change sign in/up
   bool showsignin = true;
 
-  void _showErrorDialog(String message, List errorList) {
+  void _showErrorDialog(String message, String content, List errorList) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
           message,
           style: TextStyle(color: Colors.black),
+          textDirection: intl.Bidi.detectRtlDirectionality(
+                  Provider.of<LanguageProvider>(context)
+                      .getTexts("test_direction"))
+              ? TextDirection.rtl
+              : TextDirection.ltr,
         ),
         content: Container(
-          height: 100,
+          height: errorList.length <= 2 ? 75 : 135,
           child: SingleChildScrollView(
             child: Column(
               children: [
-                ...errorList.map((catdata) => Text(catdata.toString())).toList()
+                ...errorList
+                    .map((error) => Text(
+                          error.toString(),
+                          textDirection: intl.Bidi.detectRtlDirectionality(
+                                  error.toString())
+                              ? TextDirection.rtl
+                              : TextDirection.ltr,
+                        ))
+                    .toList(),
+                Text(content),
               ],
             ),
           ),
@@ -133,21 +160,19 @@ class _AuthFormState extends State<AuthForm> {
     if (isValid) {
       try {
         print("valiiiiiiid");
-        setState(() {
-          _isloading = true;
-        });
+        setState(() => _isloading = true);
         await Provider.of<AuthProvider>(context, listen: false).signUp(
           email.text,
           password.text,
           confirmpassword.text,
           username.text,
           name.text,
-          Provider.of<LanguageProvider>(context).currentLangCode,
+          Provider.of<LanguageProvider>(context, listen: false).currentLangCode,
         );
         setState(() => _isloading = false);
       } catch (error) {
         setState(() => _isloading = false);
-        _showErrorDialog(error,
+        _showErrorDialog(error, '',
             Provider.of<AuthProvider>(context, listen: false).finalErrorsList);
       }
     }
@@ -167,11 +192,14 @@ class _AuthFormState extends State<AuthForm> {
         await Provider.of<AuthProvider>(context, listen: false).logIn(
             email.text,
             password.text,
-            Provider.of<LanguageProvider>(context).currentLangCode);
+            Provider.of<LanguageProvider>(context, listen: false)
+                .currentLangCode);
         setState(() => _isloading = false);
       } catch (error) {
         setState(() => _isloading = false);
-        _showErrorDialog(error,
+        _showErrorDialog(
+            "Opps !",
+            error,
             Provider.of<AuthProvider>(context, listen: false).finalErrorsList);
       }
     }
@@ -206,7 +234,7 @@ class _AuthFormState extends State<AuthForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              txt.getTexts('email'),
+              showsignin ? "email or username" : txt.getTexts('email'),
               style: kLabelStyle,
             ),
             SizedBox(height: 5.0),
@@ -216,7 +244,7 @@ class _AuthFormState extends State<AuthForm> {
               height: 50.0,
               child: TextFormField(
                 controller: email,
-                validator: validEmail,
+                validator: showsignin ? validName : validEmail,
                 obscureText: false,
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(
@@ -230,7 +258,9 @@ class _AuthFormState extends State<AuthForm> {
                     Icons.email,
                     color: Colors.white,
                   ),
-                  hintText: txt.getTexts('enter_your_email'),
+                  hintText: showsignin
+                      ? "enter_your_email_or_username"
+                      : txt.getTexts('enter_your_email'),
                   hintStyle: kHintTextStyle,
                 ),
               ),
@@ -251,7 +281,7 @@ class _AuthFormState extends State<AuthForm> {
                     height: 50.0,
                     child: TextFormField(
                       controller: username,
-                      validator: validusernameAndName,
+                      validator: validUsername,
                       keyboardType: TextInputType.name,
                       obscureText: false,
                       style: TextStyle(
@@ -288,7 +318,7 @@ class _AuthFormState extends State<AuthForm> {
                     height: 50.0,
                     child: TextFormField(
                       controller: name,
-                      validator: validusernameAndName,
+                      validator: validName,
                       obscureText: false,
                       keyboardType: TextInputType.name,
                       style: TextStyle(
@@ -485,15 +515,15 @@ class _AuthFormState extends State<AuthForm> {
       return Container(
         padding: EdgeInsets.symmetric(vertical: 20.0),
         width: double.infinity,
-        // ignore: deprecated_member_use
-        child: RaisedButton(
-          elevation: 5.0,
+        child: ElevatedButton(
           onPressed: submitSignIn,
-          padding: EdgeInsets.all(15.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-          ),
-          color: Colors.white,
+          // style: ElevatedButton.styleFrom(
+          //     elevation: 5.0,
+          //     padding: EdgeInsets.all(15.0),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(30.0),
+          //     ),
+          //     ),
           child: Text(
             txt.getTexts('sign_in'),
             style: TextStyle(

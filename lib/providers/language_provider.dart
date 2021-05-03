@@ -10,7 +10,7 @@ enum Languages {
 class LanguageProvider with ChangeNotifier {
   var currentLang = Languages.English;
   String currentLangText = "english";
-  String currentLangCode = "en";
+  String currentLangCode = "ar";
 
   Map<String, Object> textsEn = {
     "settings": "Settings",
