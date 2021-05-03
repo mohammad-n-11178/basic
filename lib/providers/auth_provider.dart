@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class AuthProvider with ChangeNotifier {
   String _token;
   DateTime _expairyDate;
-  String _userId;
+
   Timer _authTimer;
 
   String siteUrl = "https://edu-technology.net/main/api";
@@ -20,16 +20,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   String get token {
-    if (_expairyDate != null &&
-        _expairyDate.isAfter(DateTime.now()) &&
-        _token != null) {
+    if (_token != null) {
       return _token;
     }
     return null;
-  }
-
-  String get userId {
-    return _userId;
   }
 
   Future<void> _register(
@@ -165,7 +159,6 @@ class AuthProvider with ChangeNotifier {
     if (expiryDate.isBefore(DateTime.now())) return false;
 
     _token = extractedData['token'];
-    _userId = extractedData['userId'];
     _expairyDate = expiryDate;
 
     notifyListeners();
@@ -175,7 +168,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logOut() async {
     _token = null;
-    _userId = null;
     _expairyDate = null;
     if (_authTimer != null) {
       _authTimer.cancel();
