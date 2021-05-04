@@ -1,3 +1,4 @@
+import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -252,8 +253,46 @@ class _SettingsState extends State<Settings> {
                 "",
                 Icons.login_outlined,
                 Colors.red,
-                () {},
-              ),
+                () {
+                  showDialog(
+                      builder: (context) {
+                        return AlertDialog(
+                          // backgroundColor: Color(0xFF73AEF5) ,
+                          title: Text("Are you sure ?"),
+                          content: Container(
+                            height: 30,
+                            child: Column(
+                              children: [
+                                Text("do you want to log out ?"),
+                              ],
+                            ),
+                          ),
+                          actions: [
+                            // ignore: deprecated_member_use
+                            FlatButton(
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                  await Provider.of<AuthProvider>(context,
+                                          listen: false)
+                                      .logOut();
+                                },
+                                child: Text(
+                                  'Logout',
+                                  style: TextStyle(color: Colors.red),
+                                )),
+                            // ignore: deprecated_member_use
+                            FlatButton(
+                                onPressed: () {
+                                  return Navigator.of(context).pop();
+                                },
+                                child: Text('cancel'))
+                          ],
+                        );
+                      },
+                      context: context);
+                },
+              )
             ],
           ),
         ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,14 +16,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState()  {
     Provider.of<ThemeProvider>(context, listen: false).getThemeMode();
-    Provider.of<LanguageProvider>(context, listen: false).getLanguage()();
+    Provider.of<LanguageProvider>(context, listen: false).getLanguage();
     Provider.of<ThemeProvider>(context, listen: false).getThemeColors();
+    Provider.of<AuthProvider>(context, listen: false).tryAutoLogIn();
+
 
     super.initState();
-    Timer(
-        Duration(seconds: 1),
-        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => MyHomePage())));
+    // Timer(
+    //     Duration(seconds: 5),
+    //     () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+    //         builder: (BuildContext context) => HomeScreen())));
   }
 
   @override

@@ -46,10 +46,10 @@ class MyDrawer extends StatelessWidget {
           ),
           // trailing: Icon(Icons.check_circle_outline),
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => GeneralSetting()),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => GeneralSetting()),
+            // );
           },
           contentPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),
         ),

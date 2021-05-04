@@ -19,7 +19,7 @@ dependencies:
   url_launcher: ^6.0.3
   flutter_signin_button: ^1.1.0
   flutter_colorpicker: ^0.4.0
-  slide_popup_dialog: ^0.0.2
+  # flutter_facebook_auth: 
 
 
 

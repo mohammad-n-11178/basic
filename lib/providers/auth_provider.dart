@@ -13,7 +13,7 @@ class AuthProvider with ChangeNotifier {
   String siteUrl = "https://edu-technology.net/main/api";
 
   List finalErrorsList = [];
-  String error = 'there is an error.';
+  String error = 'something went wrong.';
 
   bool get isAuth {
     return _token != null;
@@ -58,9 +58,15 @@ class AuthProvider with ChangeNotifier {
 
     try {
       if (response.statusCode == 200) {
-        await response.stream.bytesToString().then((value) {
-          print(value);
-        });
+        var responseStreemed = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(responseStreemed.body);
+        print(jsonResponse['token']);
+        _token = jsonResponse['token'];
+        notifyListeners();
+
+        final prefs = await SharedPreferences.getInstance();
+        String userData = json.encode({'token': _token});
+        prefs.setString('userData', userData);
       } else if (response.statusCode == 422) {
         finalErrorsList.clear();
         print(response.statusCode);
@@ -110,10 +116,16 @@ class AuthProvider with ChangeNotifier {
     http.StreamedResponse response = await request.send();
     try {
       if (response.statusCode == 200) {
-        await response.stream.bytesToString().then((value) {
-          print(value);
-          print("here 1");
+        var responseStreemed = await http.Response.fromStream(response);
+        var jsonResponse = json.decode(responseStreemed.body);
+        print(jsonResponse['token']);
+        _token = jsonResponse['token'];
+        notifyListeners();
+        final prefs = await SharedPreferences.getInstance();
+        String userData = json.encode({
+          'token': _token,
         });
+        prefs.setString('userData', userData);
       } else if (response.statusCode == 401) {
         String error = 'there is an error.';
         var responseStreemed = await http.Response.fromStream(response);
@@ -147,6 +159,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> tryAutoLogIn() async {
+    print("tryAutoLogIn started");
+    print("token is : $_token");
     final prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey("userData")) return false;
 
@@ -154,42 +168,48 @@ class AuthProvider with ChangeNotifier {
         json.decode(prefs.getString("userData")) as Map<String, Object>;
 
     // because we stored the expiryDate as a String now we want to convert it to Date
-    final expiryDate = DateTime.parse(extractedData['expiryDate']);
+    // final expiryDate = DateTime.parse(extractedData['expiryDate']);
 
-    if (expiryDate.isBefore(DateTime.now())) return false;
+    // if (expiryDate.isBefore(DateTime.now())) return false;
 
     _token = extractedData['token'];
-    _expairyDate = expiryDate;
+    // _expairyDate = expiryDate;
 
     notifyListeners();
-    _autoLogout();
+    // _autoLogout();
     return true;
   }
 
   Future<void> logOut() async {
+    print("logOut pressed");
+    print("token is : $_token");
+    // print(_expairyDate);
+
     _token = null;
     _expairyDate = null;
-    if (_authTimer != null) {
-      _authTimer.cancel();
-      _authTimer = null;
-    }
+    // if (_authTimer != null) {
+    //   _authTimer.cancel();
+    //   _authTimer = null;
+    // }
     notifyListeners();
+    print("0000");
+
+    print("token is : $_token");
+
+    // print(_expairyDate);
 
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
   }
 
-  void _autoLogout() {
-    if (_authTimer != null) {
-      _authTimer.cancel();
-    }
-    final timeToExpiry = _expairyDate.difference(DateTime.now()).inSeconds;
-    _authTimer = Timer(Duration(seconds: timeToExpiry), logOut);
-  }
-}
-
-
-
+//   void _autoLogout() {
+//     if (_authTimer != null) {
+//       _authTimer.cancel();
+//     }
+//     final timeToExpiry = _expairyDate.difference(DateTime.now()).inSeconds;
+//     _authTimer = Timer(Duration(seconds: timeToExpiry), logOut);
+//   }
+// }
 
   // final url = "http://main.edu-technology.net/public/api/$urlSegment";
   // try {
@@ -221,3 +241,4 @@ class AuthProvider with ChangeNotifier {
   // } catch (e) {
   //   throw e;
   // }
+}
