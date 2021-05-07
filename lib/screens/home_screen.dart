@@ -1,3 +1,4 @@
+import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text(Provider.of<LanguageProvider>(context)
-            .getTexts("the_current_lang")),
+        child: Column(children: [
+          Text(Provider.of<LanguageProvider>(context)
+              .getTexts("the_current_lang")),
+          OutlinedButton(
+              onPressed: () => Provider.of<AuthProvider>(context,listen: false).getUser(),
+              child: Text("get_user"))
+        ]),
       ),
       appBar: AppBar(),
       drawer: MyDrawer(),

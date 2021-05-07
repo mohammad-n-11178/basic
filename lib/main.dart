@@ -2,7 +2,7 @@ import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/providers/theme_provider.dart';
 import 'package:basic_project/screens/about_screen.dart';
-import 'package:basic_project/screens/auth_form.dart';
+import 'package:basic_project/screens/auth_screen.dart';
 import 'package:basic_project/screens/home_screen.dart';
 import 'package:basic_project/screens/setting_screen.dart';
 import 'package:basic_project/screens/splash_screen.dart';
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
                   builder: (ctx, AsyncSnapshot authSnapshot) =>
                       authSnapshot.connectionState == ConnectionState.waiting
                           ? SplashScreen()
-                          : AuthForm()),
+                          : AuthScreen()),
         ),
       ),
     );

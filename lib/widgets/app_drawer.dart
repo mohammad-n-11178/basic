@@ -1,5 +1,5 @@
 import 'package:basic_project/providers/language_provider.dart';
-import 'package:basic_project/screens/auth_form.dart';
+import 'package:basic_project/screens/auth_screen.dart';
 import 'package:basic_project/screens/general_setting.dart';
 import 'package:basic_project/screens/setting_screen.dart';
 import 'package:flutter/material.dart';
@@ -150,7 +150,7 @@ class MyDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AuthForm()),
+                    MaterialPageRoute(builder: (context) => AuthScreen()),
                   );
                 },
                 contentPadding: EdgeInsets.fromLTRB(8, 0, 8, 0),

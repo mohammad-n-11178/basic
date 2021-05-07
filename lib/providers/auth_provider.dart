@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:basic_project/models/user.dart';
+import 'package:basic_project/shared/api.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -9,8 +11,6 @@ class AuthProvider with ChangeNotifier {
   DateTime _expairyDate;
 
   Timer _authTimer;
-
-  String siteUrl = "https://edu-technology.net/main/api";
 
   List finalErrorsList = [];
   String error = 'something went wrong.';
@@ -44,7 +44,7 @@ class AuthProvider with ChangeNotifier {
       'X-Requested-With': 'XMLHttpRequest',
       "X-localization": deviceLanguage,
     };
-    var request = http.MultipartRequest('POST', Uri.parse('$siteUrl/register'));
+    var request = http.MultipartRequest('POST', Uri.parse('${Api.register}'));
 
     request.fields.addAll({
       'email': email,
@@ -105,7 +105,7 @@ class AuthProvider with ChangeNotifier {
       'X-Requested-With': 'XMLHttpRequest',
       "X-localization": deviceLanguage
     };
-    var request = http.MultipartRequest('POST', Uri.parse('$siteUrl/login'));
+    var request = http.MultipartRequest('POST', Uri.parse('${Api.login}'));
     request.fields.addAll({
       'login': email,
       'password': password,
@@ -115,6 +115,8 @@ class AuthProvider with ChangeNotifier {
 
     http.StreamedResponse response = await request.send();
     try {
+      print("here 6");
+
       if (response.statusCode == 200) {
         var responseStreemed = await http.Response.fromStream(response);
         var jsonResponse = json.decode(responseStreemed.body);
@@ -135,9 +137,13 @@ class AuthProvider with ChangeNotifier {
         error = "your data is invalid.\nrewrite your details and try again";
         throw error;
       } else {
+        print("here 5");
+        print(error);
         throw error;
       }
     } catch (e) {
+      print("here 6");
+
       throw e;
     }
   }
@@ -193,13 +199,47 @@ class AuthProvider with ChangeNotifier {
     // }
     notifyListeners();
     print("0000");
-
     print("token is : $_token");
-
     // print(_expairyDate);
-
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
+  }
+
+  Future<void> getUser() async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Authorization': '${Api.tokenType + " " + _token} ',
+      'X-localization': 'en'
+    };
+    var request = http.MultipartRequest('GET', Uri.parse(Api.getUser));
+    print(headers['Authorization']);
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print("200");
+
+      var responseStreemed = await http.Response.fromStream(response);
+      final jsonResponse = json.decode(responseStreemed.body);
+      // print(jsonResponse['user']);
+
+      print(jsonResponse['user']);
+      User.fromJson(jsonResponse['user']);
+      notifyListeners();
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  static bool checkConnectionError(e) {
+    if (e.toString().contains('SocketException') ||
+        e.toString().contains('HandshakeException')) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 //   void _autoLogout() {

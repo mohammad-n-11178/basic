@@ -74,4 +74,8 @@ class ThemeProvider with ChangeNotifier {
     else if (themeText == "system defult") tm = ThemeMode.system;
     notifyListeners();
   }
+
+    static isDark(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
 }

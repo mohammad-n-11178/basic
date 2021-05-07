@@ -1,7 +1,9 @@
+import 'package:basic_project/models/user.dart';
 import 'package:basic_project/providers/auth_provider.dart';
 import 'package:basic_project/providers/language_provider.dart';
 import 'package:basic_project/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart' as intl; //this for auto dirctionality
 import 'dart:ui' as ui;
@@ -16,6 +18,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<User>(context,listen: false);
     var txt = Provider.of<LanguageProvider>(context, listen: true);
 
     Widget buildRadioThemeListTile(
@@ -178,11 +181,15 @@ class _SettingsState extends State<Settings> {
                               backgroundImage: NetworkImage(
                                   "https://images.unsplash.com/photo-1598897516650-e4dc73d8e417?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80"),
                             ),
-                            Text("Alice Margret"),
+                            Text(User().name != null
+                                ? User().email.toString()
+                                : "Alice Margret"),
+                            Text(User().username.toString()),
                             Text(
                               "@aliceMargret",
                               style: TextStyle(color: Colors.grey[400]),
                             ),
+                            Text(user.email.toString()),
                           ],
                         ),
                         Spacer(),
@@ -191,7 +198,7 @@ class _SettingsState extends State<Settings> {
                   ),
                 ],
               ),
-              Divider(),
+              Divider(), 
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 10),
                 child: Text(
